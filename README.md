@@ -19,8 +19,8 @@ Simply run *main.py* and type your expression
 * ^
 * \*
 * /
-* +
-* -
+* \+
+* \-
 
 ## Constants
 * Pi
