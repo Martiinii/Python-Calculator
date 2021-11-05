@@ -35,9 +35,9 @@ class Expression:
         Constant = 'Constant'
 
     class RawToken:
-        def __init__(self, value, type) -> None:
+        def __init__(self, value, kind) -> None:
             self.value = value
-            self.type = type
+            self.kind = kind
         def getToken(self):
             pass
 
@@ -161,16 +161,16 @@ class Expression:
             return Expression.TYPES.Parenthesis
         return Expression.TYPES.Function
 
-    def autoCreateToken(self, type, value):
-        if type == Expression.TYPES.Number:
+    def autoCreateToken(self, kind, value):
+        if kind == Expression.TYPES.Number:
             return Expression.NumberToken(float(value))
-        elif type == Expression.TYPES.Operator:
+        elif kind == Expression.TYPES.Operator:
             return Expression.OperatorToken(value)
-        elif type == Expression.TYPES.Parenthesis:
+        elif kind == Expression.TYPES.Parenthesis:
             return Expression.ParenthesisToken(value)
-        elif type == Expression.TYPES.Function:
+        elif kind == Expression.TYPES.Function:
             return Expression.FunctionToken(value)
-        elif type == Expression.TYPES.Constant:
+        elif kind == Expression.TYPES.Constant:
             return Expression.ConstantToken(value)
 
     def __operatorCheck(self, raw : list[RawToken]):
@@ -178,20 +178,20 @@ class Expression:
         i = 0
 
         while i < len(tokens):
-            if tokens[i].type == Expression.TYPES.Parenthesis:
-                if i+1 < len(tokens) and tokens[i+1].type == Expression.TYPES.Parenthesis:
+            if tokens[i].kind == Expression.TYPES.Parenthesis:
+                if i+1 < len(tokens) and tokens[i+1].kind == Expression.TYPES.Parenthesis:
                     tokens.insert(i+1, Expression.OperatorToken('*'))
 
                 tokens[i].value = self.__operatorCheck(tokens[i].value)
 
-            if tokens[i].type == Expression.TYPES.Function and tokens[i].value in Expression.CONSTANTS:
+            if tokens[i].kind == Expression.TYPES.Function and tokens[i].value in Expression.CONSTANTS:
                 tokens[i] = Expression.ConstantToken(tokens[i].value)
 
-            if i+1 < len(tokens) and tokens[i].type in [Expression.TYPES.Number, Expression.TYPES.Constant] and tokens[i+1].type in [Expression.TYPES.Parenthesis, Expression.TYPES.Function, Expression.TYPES.Constant]:
+            if i+1 < len(tokens) and tokens[i].kind in [Expression.TYPES.Number, Expression.TYPES.Constant] and tokens[i+1].kind in [Expression.TYPES.Parenthesis, Expression.TYPES.Function, Expression.TYPES.Constant]:
                 tokens.insert(i+1, Expression.OperatorToken('*'))
             i += 1
 
-        if tokens[0].type == Expression.TYPES.Operator and tokens[0].value == '-':
+        if tokens[0].kind == Expression.TYPES.Operator and tokens[0].value == '-':
             tokens.insert(0, Expression.NumberToken(0))
 
         return tokens
@@ -205,19 +205,19 @@ class Expression:
         tokens = list(tok)
 
         if len(tokens) == 1:
-            if tokens[0].type == Expression.TYPES.Number:
+            if tokens[0].kind == Expression.TYPES.Number:
                 return tokens[0].value
-            elif tokens[0].type == Expression.TYPES.Parenthesis:
+            elif tokens[0].kind == Expression.TYPES.Parenthesis:
                 return self.__calculate(tokens[0].value)
-            elif tokens[0].type == Expression.TYPES.Constant:
+            elif tokens[0].kind == Expression.TYPES.Constant:
                 return Expression.CONSTANTS[tokens[0].value]
             else:
                 raise Exception('Invalid expression!')
 
         for i in range(len(tokens)):
-            if tokens[i].type == Expression.TYPES.Operator:
+            if tokens[i].kind == Expression.TYPES.Operator:
                 operators[3 - Expression.OPERATORS[tokens[i].value]].append(tokens[i])
-            elif tokens[i].type == Expression.TYPES.Function:
+            elif tokens[i].kind == Expression.TYPES.Function:
                 functions.append(tokens[i])
 
         if operators == [[],[],[]] and functions == []:
@@ -230,7 +230,7 @@ class Expression:
                 raise Exception(f'Function \'{f.value}\' doesn\'t have body!')
 
             right = tokens[index+1]
-            if right.type != Expression.TYPES.Parenthesis:
+            if right.kind != Expression.TYPES.Parenthesis:
                 raise Exception(f'The argument of function \'{f.value}\' must be enclosed in parentheses!')
 
             res = self.__calculate(right.value)
@@ -249,20 +249,20 @@ class Expression:
                 right = tokens[index+1]
                 l = r = 0
                 
-                if left.type == Expression.TYPES.Number:
+                if left.kind == Expression.TYPES.Number:
                     l = left.value
-                elif left.type == Expression.TYPES.Parenthesis:
+                elif left.kind == Expression.TYPES.Parenthesis:
                     l = self.__calculate(left.value)
-                elif left.type == Expression.TYPES.Constant:
+                elif left.kind == Expression.TYPES.Constant:
                     l = Expression.CONSTANTS[left.value]
                 else:
                     raise Exception('Invalid expression!')
 
-                if right.type == Expression.TYPES.Number:
+                if right.kind == Expression.TYPES.Number:
                     r = right.value
-                elif right.type == Expression.TYPES.Parenthesis:
+                elif right.kind == Expression.TYPES.Parenthesis:
                     r = self.__calculate(right.value)
-                elif right.type == Expression.TYPES.Constant:
+                elif right.kind == Expression.TYPES.Constant:
                     r = Expression.CONSTANTS[right.value]
                 else:
                     raise Exception('Invalid expression!')
@@ -283,7 +283,7 @@ class Expression:
                 tokens.pop(index+1)
                 tokens[index] = Expression.NumberToken(res)
                 tokens.pop(index-1)
-        if tokens[0].type != Expression.TYPES.Number:
+        if tokens[0].kind != Expression.TYPES.Number:
             raise Exception('Invalid expression!')
         return round(tokens[0].value, 16)
 
