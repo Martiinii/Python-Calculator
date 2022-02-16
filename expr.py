@@ -12,12 +12,14 @@ class Expression:
     FUNCTIONS = {
         'sqrt': math.sqrt,
         'sin': lambda x: math.sin(math.radians(x)),
-        'cos': lambda x: math.cos(math.radians(x)),
+        'cos': lambda x: 0.0 if x == 90 else math.cos(math.radians(x)),
         'tan': lambda x: math.tan(math.radians(x)),
         'cot': lambda x: 1 / math.tan(math.radians(x)),
         'deg': math.degrees,
         'rad': math.radians,
-        'fact': lambda x: math.factorial(int(x))
+        'fact': lambda x: math.factorial(int(x)),
+        'asin': lambda x: math.degrees(math.asin(x)),
+        'acos': lambda x: math.degrees(math.acos(x))
     }
 
     CONSTANTS = {
